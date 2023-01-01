@@ -10,6 +10,8 @@ packages = [{include = "page_analyzer"}]
 python = "^3.10"
 Flask = "^2.2.2"
 gunicorn = "^20.1.0"
+psycopg2 = "^2.9.5"
+python-dotenv = "^0.21.0"
 
 
 [tool.poetry.group.dev.dependencies]
