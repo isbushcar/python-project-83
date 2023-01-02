@@ -128,6 +128,7 @@ def check_url(url_id):
     url_to_check = cur.fetchall()[0][0]
     try:
         response = requests.get(url_to_check)
+        response.raise_for_status()
     except requests.exceptions.RequestException:
         conn.close()
         flash('Произошла ошибка при проверке', 'danger')
