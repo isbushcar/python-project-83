@@ -47,10 +47,11 @@ def add_url():
     conn = get_conn()
     cur = conn.cursor()
     cur.execute(
-        'SELECT * FROM public.urls WHERE urls.name = %s LIMIT 1',
+        'SELECT id FROM public.urls WHERE urls.name = %s LIMIT 1',
         (url,),
     )
-    if not cur.fetchall():
+    result = cur.fetchall()
+    if not result:
         cur.execute('INSERT INTO public.urls (name) VALUES (%s)', (url,))
         conn.commit()
         flash('Страница успешно добавлена', 'success')
@@ -59,13 +60,13 @@ def add_url():
             'SELECT id FROM public.urls WHERE urls.name = %s LIMIT 1',
             (url,),
         )
-        added_id = cur.fetchall()[0][0]
+        url_id = cur.fetchall()[0][0]
         conn.close()
-        return redirect(url_for('show_url_details', url_id=added_id))
     else:
         flash('Страница уже существует', 'info')
         conn.close()
-        return redirect(url_for('index'))
+        url_id = result[0][0]
+    return redirect(url_for('show_url_details', url_id=url_id))
 
 
 @app.get('/urls/<int:url_id>')
