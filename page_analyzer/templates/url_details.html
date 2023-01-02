@@ -22,27 +22,36 @@
             </table>
         </div>
 
-<!--        <h2 class="mt-5 mb-3">Проверки</h2>-->
-<!--        <form method="post" action="/urls/1/checks">-->
-<!--            <input type="submit" class="btn btn-primary" value="Запустить проверку">-->
-<!--        </form>-->
+        <h2 class="mt-5 mb-3">Проверки</h2>
+        <form method="post" action="/urls/{{ url.id }}/checks">
+            <input type="submit" class="btn btn-primary" value="Запустить проверку">
+        </form>
 
-<!--        <div>-->
-<!--            <table class="table table-bordered table-hover mt-2" data-test="checks">-->
-<!--                <tbody>-->
-<!--                <tr>-->
-<!--                    <th>ID</th>-->
-<!--                    <th>Код ответа</th>-->
-<!--                    <th>h1</th>-->
-<!--                    <th>title</th>-->
-<!--                    <th>description</th>-->
-<!--                    <th>Дата создания</th>-->
-<!--                </tr>-->
+        <div>
+            <table class="table table-bordered table-hover mt-2" data-test="checks">
+                <tbody>
+                <tr>
+                    <th>ID</th>
+                    <th>Код ответа</th>
+                    <th>h1</th>
+                    <th>title</th>
+                    <th>description</th>
+                    <th>Дата создания</th>
+                </tr>
+                {% for check in checks %}
+                <tr>
+                    <td>{{ check.id }}</td>
+                    <td>Код ответа</td>
+                    <td>h1</td>
+                    <td>title</td>
+                    <td>description</td>
+                    <td>{{ check.created_at }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-<!--                </tbody>-->
-<!--            </table>-->
-<!--        </div>-->
-
-<!--    </div>-->
-<!--</main>-->
+    </div>
+</main>
 {% endblock %}
