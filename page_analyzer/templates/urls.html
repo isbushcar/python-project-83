@@ -17,7 +17,7 @@
                     <td>{{ url.id }}</td>
                     <td><a href="/urls/{{ url.id }}">{{ url.name }}</a></td>
                     <td>{{ url.last_checked }}</td>
-                    <td>Код ответа</td>
+                    <td>{{ url.status_code }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>

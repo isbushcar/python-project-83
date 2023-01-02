@@ -13,3 +13,22 @@ CREATE TABLE public.url_checks (
     description text,
     created_at timestamp DEFAULT now()
 );
+
+CREATE VIEW public.urls_with_last_checks AS (
+    SELECT
+           urls.id,
+           urls.name,
+           coalesce(uc.last_checked::date::text, '') as last_checked,
+           coalesce(uc.status_code::text, '') as status_code
+    FROM public.urls
+    LEFT JOIN (
+        SELECT
+           url_id,
+           created_at AS last_checked,
+           status_code,
+           row_number() OVER (PARTITION BY url_id ORDER BY created_at DESC) rn
+        FROM public.url_checks
+        ) uc
+        ON urls.id = uc.url_id
+    WHERE uc.rn = 1
+    ORDER BY urls.created_at DESC);
