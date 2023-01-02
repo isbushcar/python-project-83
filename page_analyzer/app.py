@@ -42,7 +42,7 @@ def add_url():
             'index.html',
             url=form_input,
             messages=get_flashed_messages(with_categories=True)
-        )
+        ), 422
 
     conn = get_conn()
     cur = conn.cursor()
