@@ -20,8 +20,11 @@ CONN = psycopg2.connect(DATABASE_URL)
 
 @app.get('/')
 def index():
-    messages = get_flashed_messages(with_categories=True)
-    return render_template('index.html', messages=messages, url={})
+    return render_template(
+        'index.html',
+        messages=get_flashed_messages(with_categories=True),
+        url={},
+    )
 
 
 @app.post('/urls')
@@ -37,9 +40,12 @@ def add_url():
         )
 
     cur = CONN.cursor()
-    cur.execute('SELECT * FROM urls WHERE urls.name = %s LIMIT 1', (url,))
+    cur.execute(
+        'SELECT * FROM public.urls WHERE urls.name = %s LIMIT 1',
+        (url,),
+    )
     if not cur.fetchall():
-        cur.execute('INSERT INTO urls (name) VALUES (%s)', (url,))
+        cur.execute('INSERT INTO public.urls (name) VALUES (%s)', (url,))
         CONN.commit()
         flash('Страница успешно добавлена', 'success')
     else:
@@ -48,12 +54,12 @@ def add_url():
 
 
 @app.get('/urls/<int:url_id>')
-def show_url(url_id):
+def show_url_details(url_id):
     cur = CONN.cursor(cursor_factory=RealDictCursor)
     cur.execute("""
                     SELECT
-                        id, name, DATE_TRUNC('day', created_at) AS created_at
-                    FROM urls
+                        id, name, created_at::date
+                    FROM public.urls
                     WHERE urls.id = %s
                     LIMIT 1""",
                 (url_id,)
@@ -61,17 +67,62 @@ def show_url(url_id):
     result = cur.fetchall()
     if not result:
         return render_template('/404.html'), 404
-    return render_template('/url_details.html', url=result[0])
+
+    cur.execute("""
+                    SELECT
+                        id, status_code, h1, title,
+                        description, created_at::date
+                    FROM public.url_checks
+                    WHERE url_checks.url_id = %s
+                    """,
+                (url_id,)
+                )
+    checks = cur.fetchall()
+
+    return render_template(
+        '/url_details.html',
+        url=result[0],
+        checks=checks,
+        messages=get_flashed_messages(with_categories=True),
+    )
 
 
 @app.get('/urls')
 def show_all_urls():
     cur = CONN.cursor(cursor_factory=RealDictCursor)
     cur.execute("""
-        SELECT id, name
-        FROM urls
-        ORDER BY created_at DESC
+        SELECT
+               urls.id,
+               urls.name,
+               uc.last_checked
+        FROM public.urls
+        LEFT JOIN (
+            SELECT DISTINCT
+               url_id,
+               max(created_at::date) OVER (PARTITION BY url_id) AS last_checked
+            FROM public.url_checks
+            ) uc
+            ON urls.id = uc.url_id
+        ORDER BY urls.created_at DESC
         """,
                 )
     urls = cur.fetchall()
-    return render_template('/urls.html', urls=urls)
+    return render_template(
+        '/urls.html',
+        urls=urls,
+        messages=get_flashed_messages(with_categories=True),
+    )
+
+
+@app.post('/urls/<int:url_id>/checks')
+def check_url(url_id):
+    cur = CONN.cursor()
+    cur.execute("""
+        INSERT INTO public.url_checks (url_id)
+        VALUES (%s)
+        """,
+                (url_id,),
+                )
+    CONN.commit()
+    flash('Страница успешно проверена', 'success')
+    return redirect(url_for('show_url_details', url_id=url_id))
