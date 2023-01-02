@@ -140,7 +140,7 @@ def check_url(url_id):
     description = description.get("content") if description else ''
 
     cur.execute("""
-        INSERT INTO public.url_checks 
+        INSERT INTO public.url_checks
             (url_id, status_code, title, h1, description)
         VALUES (%s, %s, %s, %s, %s)
         """,
