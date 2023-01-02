@@ -1,8 +1,10 @@
-import psycopg2
-from psycopg2.extras import RealDictCursor
 import os
-from flask import render_template, Flask, request, flash, url_for, redirect, get_flashed_messages, render_template
+
+import psycopg2
 from dotenv import load_dotenv
+from flask import Flask, request, flash, url_for, redirect, \
+    get_flashed_messages, render_template
+from psycopg2.extras import RealDictCursor
 from validators.url import url as validate_url
 
 load_dotenv()
@@ -49,10 +51,10 @@ def add_url():
 def show_url(url_id):
     cur = CONN.cursor(cursor_factory=RealDictCursor)
     cur.execute("""
-                    SELECT 
-                        id, name, DATE_TRUNC('day', created_at) AS created_at 
-                    FROM urls 
-                    WHERE urls.id = %s 
+                    SELECT
+                        id, name, DATE_TRUNC('day', created_at) AS created_at
+                    FROM urls
+                    WHERE urls.id = %s
                     LIMIT 1""",
                 (url_id,)
                 )
